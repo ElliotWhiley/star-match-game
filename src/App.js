@@ -1,12 +1,47 @@
 import "./App.css";
 import React from "react";
 
-// STAR MATCH - Starting Template
-
 const App = () => {
 	const [numberOfStars, setNumberOfStars] = React.useState(
 		utils.random(1, 9)
 	);
+	const [candidateNumbers, setCandidateNumbers] = React.useState([]);
+	const [availableNumbers, setAvailableNumbers] = React.useState(
+		utils.range(1, 9)
+	);
+	const candidatesAreWrong = utils.sum(candidateNumbers) > numberOfStars;
+
+	const numberStatus = (number) => {
+		if (!availableNumbers.includes(number)) {
+			return "used";
+		}
+		if (candidateNumbers.includes(number)) {
+			return candidatesAreWrong ? "wrong" : "candidate";
+		}
+		return "available";
+	};
+
+	const onNumberClick = (numberClicked, currentStatus) => {
+		if (currentStatus === "used") {
+			return;
+		}
+
+		const newCandidateNumbers =
+			currentStatus == "available"
+				? [...candidateNumbers, numberClicked]
+				: candidateNumbers.filter((x) => x !== numberClicked);
+
+		if (utils.sum(newCandidateNumbers) !== numberOfStars) {
+			setCandidateNumbers(newCandidateNumbers);
+		} else {
+			const newAvailableNumbers = availableNumbers.filter(
+				(x) => !newCandidateNumbers.includes(x)
+			);
+			setNumberOfStars(utils.randomSumIn(newAvailableNumbers, 9));
+			setAvailableNumbers(newAvailableNumbers);
+			setCandidateNumbers([]);
+		}
+	};
 
 	return (
 		<div className="game">
@@ -19,7 +54,12 @@ const App = () => {
 				</div>
 				<div className="right">
 					{utils.range(1, 9).map((number) => (
-						<GridNumber key={number} number={number} />
+						<GridNumber
+							key={number}
+							number={number}
+							status={numberStatus(number)}
+							onClick={onNumberClick}
+						/>
 					))}
 				</div>
 			</div>
@@ -40,7 +80,11 @@ const StarsDisplay = (props) => {
 
 const GridNumber = (props) => {
 	return (
-		<button className="number" onClick={() => console.log(props.number)}>
+		<button
+			className="number"
+			style={{ backgroundColor: colors[props.status] }}
+			onClick={() => props.onClick(props.number, props.status)}
+		>
 			{props.number}
 		</button>
 	);
