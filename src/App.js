@@ -2,6 +2,12 @@ import "./App.css";
 import { useState, useEffect } from "react";
 
 const App = () => {
+	const [gameId, setGameId] = useState(1);
+
+	return <Game key={gameId} startNewGame={() => setGameId(gameId + 1)} />;
+};
+
+const Game = (props) => {
 	const [numberOfStars, setNumberOfStars] = useState(utils.random(1, 9));
 	const [candidateNumbers, setCandidateNumbers] = useState([]);
 	const [availableNumbers, setAvailableNumbers] = useState(utils.range(1, 9));
@@ -23,11 +29,6 @@ const App = () => {
 			: secondsLeft === 0
 			? "lost"
 			: "active";
-	const resetGame = () => {
-		setNumberOfStars(utils.range(1, 9));
-		setAvailableNumbers(utils.range(1, 9));
-		setCandidateNumbers([]);
-	};
 
 	const numberStatus = (number) => {
 		if (!availableNumbers.includes(number)) {
@@ -70,7 +71,7 @@ const App = () => {
 				<div className="left">
 					{gameStatus !== "active" ? (
 						<PlayAgain
-							onClick={resetGame}
+							onClick={props.startNewGame}
 							gameStatus={gameStatus}
 						/>
 					) : (
