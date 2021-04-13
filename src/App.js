@@ -1,8 +1,13 @@
 import "./App.css";
+import React from "react";
 
 // STAR MATCH - Starting Template
 
 const App = () => {
+	const [numberOfStars, setNumberOfStars] = React.useState(
+		utils.random(1, 9)
+	);
+
 	return (
 		<div className="game">
 			<div className="help">
@@ -10,20 +15,34 @@ const App = () => {
 			</div>
 			<div className="body">
 				<div className="left">
-					{utils.range(1, numberOfStars).map((starId) => (
-						<div key={starId} className="star" />
-					))}
+					<StarsDisplay count={numberOfStars} />
 				</div>
 				<div className="right">
 					{utils.range(1, 9).map((number) => (
-						<button key={number} className="number">
-							{number}
-						</button>
+						<GridNumber key={number} number={number} />
 					))}
 				</div>
 			</div>
 			<div className="timer">Time Remaining: 10</div>
 		</div>
+	);
+};
+
+const StarsDisplay = (props) => {
+	return (
+		<>
+			{utils.range(1, props.count).map((starId) => (
+				<div key={starId} className="star" />
+			))}
+		</>
+	);
+};
+
+const GridNumber = (props) => {
+	return (
+		<button className="number" onClick={() => console.log(props.number)}>
+			{props.number}
+		</button>
 	);
 };
 
