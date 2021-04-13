@@ -7,11 +7,13 @@ const App = () => {
 	return <Game key={gameId} startNewGame={() => setGameId(gameId + 1)} />;
 };
 
-const Game = (props) => {
+// Custom hook - stateful function
+const useGameState = () => {
 	const [numberOfStars, setNumberOfStars] = useState(utils.random(1, 9));
 	const [candidateNumbers, setCandidateNumbers] = useState([]);
 	const [availableNumbers, setAvailableNumbers] = useState(utils.range(1, 9));
 	const [secondsLeft, setSecondsLeft] = useState(10);
+
 	useEffect(() => {
 		if (secondsLeft > 0 && availableNumbers.length > 0) {
 			const timerId = setTimeout(
@@ -21,6 +23,37 @@ const Game = (props) => {
 			return () => clearTimeout(timerId);
 		}
 	});
+
+	const setGameState = (newCandidateNumbers) => {
+		if (utils.sum(newCandidateNumbers) !== numberOfStars) {
+			setCandidateNumbers(newCandidateNumbers);
+		} else {
+			const newAvailableNumbers = availableNumbers.filter(
+				(x) => !newCandidateNumbers.includes(x)
+			);
+			setNumberOfStars(utils.randomSumIn(newAvailableNumbers, 9));
+			setAvailableNumbers(newAvailableNumbers);
+			setCandidateNumbers([]);
+		}
+	};
+
+	return {
+		numberOfStars,
+		availableNumbers,
+		candidateNumbers,
+		secondsLeft,
+		setGameState,
+	};
+};
+
+const Game = (props) => {
+	const {
+		numberOfStars,
+		availableNumbers,
+		candidateNumbers,
+		secondsLeft,
+		setGameState,
+	} = useGameState();
 
 	const candidatesAreWrong = utils.sum(candidateNumbers) > numberOfStars;
 	const gameStatus =
@@ -50,16 +83,7 @@ const Game = (props) => {
 				? [...candidateNumbers, numberClicked]
 				: candidateNumbers.filter((x) => x !== numberClicked);
 
-		if (utils.sum(newCandidateNumbers) !== numberOfStars) {
-			setCandidateNumbers(newCandidateNumbers);
-		} else {
-			const newAvailableNumbers = availableNumbers.filter(
-				(x) => !newCandidateNumbers.includes(x)
-			);
-			setNumberOfStars(utils.randomSumIn(newAvailableNumbers, 9));
-			setAvailableNumbers(newAvailableNumbers);
-			setCandidateNumbers([]);
-		}
+		setGameState(newCandidateNumbers);
 	};
 
 	return (
